@@ -43,12 +43,12 @@ class HKRecord: CustomStringConvertible {
     var totalDistance: Double = 0
     var totalEnergyBurnedUnit: String = String()
     var totalDistanceUnit: String = String()
-
-    var metadata: [String:String]?
+    
+    var metadata = [String:Any]()
 }
 
 class HKimporter : NSObject, XMLParserDelegate {
-
+    
     var healthStore:HKHealthStore?
     
     var allHKRecords: [HKRecord] = []
@@ -60,11 +60,13 @@ class HKimporter : NSObject, XMLParserDelegate {
     var readCounterLabel: UILabel? = nil
     var writeCounterLabel: UILabel? = nil
     
+    var activityTypeFilter:[HKWorkoutActivityType]?
+    
     
     convenience init(completion:@escaping ()->Void) {
-
+        
         self.init()
-
+        
         self.healthStore = HKHealthStore.init()
         
         let shareReadObjectTypes:Set<HKSampleType>? = [
@@ -92,7 +94,7 @@ class HKimporter : NSObject, XMLParserDelegate {
             HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRate)!,
             HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.heartRateVariabilitySDNN)!,
             HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.restingHeartRate)!,
-
+            
             // Measurements
             HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bodyFatPercentage)!,
             HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.height)!,
@@ -157,7 +159,7 @@ class HKimporter : NSObject, XMLParserDelegate {
             HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bloodGlucose)!,
             HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.oxygenSaturation)!,
             HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bloodAlcoholContent)!]
-
+        
         self.healthStore?.requestAuthorization(toShare: shareReadObjectTypes, read: shareReadObjectTypes, completion: { (res, error) in
             if let error = error {
                 print(error)
@@ -166,7 +168,7 @@ class HKimporter : NSObject, XMLParserDelegate {
             }
         })
     }
-
+    
     func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
         eName = elementName
         if elementName == "Record" {
@@ -193,8 +195,28 @@ class HKimporter : NSObject, XMLParserDelegate {
                 currRecord.creationDate = date
             }
         } else if elementName == "MetadataEntry" {
-            currRecord.metadata = attributeDict
+            //currRecord.metadata = attributeDict
+            var key:String?
+            var value:Any?
+            for (k,v) in attributeDict {
+                if(k == "key"){
+                    key = v
+                }
+                if(k == "value"){
+                    if let intValue = Int(v){
+                        value = intValue
+                    } else {
+                        value = v
+                    }
+                }
+            }
+            if let key = key, let value = value {
+                currRecord.metadata[key] = value
+                print(currRecord.metadata)
+            }
+            
         } else if elementName == "Workout" {
+            
             print(attributeDict)
             currRecord.type = HKObjectType.workoutType().identifier
             currRecord.activityType = activityByName(activityName: attributeDict["workoutActivityType"] ?? "")
@@ -232,24 +254,31 @@ class HKimporter : NSObject, XMLParserDelegate {
     
     func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
         if elementName == "Record" || elementName == "Workout" {
-
-            allHKRecords.append(currRecord)
-            print(currRecord.description)
-            DispatchQueue.main.async {
-                self.readCounterLabel?.text = "\(self.allHKRecords.count)"
+            // filter you need 
+            if let typeFilter = self.activityTypeFilter {
+                let ret = typeFilter.first(where: {$0 == currRecord.activityType})
+                if(ret == false){
+                    return
+                }
             }
-            saveHKRecord(item: currRecord, withSuccess: {
-                // success
-                //print("record added to array")
-            }, failure: {
-                // fail
-                print("fail to process record")
-            })
-        }
+                allHKRecords.append(currRecord)
+                print(currRecord.description)
+                DispatchQueue.main.async {
+                    self.readCounterLabel?.text = "\(self.allHKRecords.count)"
+                }
+                saveHKRecord(item: currRecord, withSuccess: {
+                    // success
+                    //print("record added to array")
+                }, failure: {
+                    // fail
+                    print("fail to process record")
+                })
+            }
+     
     }
     
     func saveHKRecord(item:HKRecord, withSuccess successBlock: @escaping () -> Void, failure failiureBlock: @escaping () -> Void) {
-      
+        
         let unit = HKUnit.init(from: item.unit!)
         let quantity = HKQuantity(unit: unit, doubleValue: item.value)
         
@@ -259,7 +288,7 @@ class HKimporter : NSObject, XMLParserDelegate {
         } else if let type = HKCategoryType.categoryType(forIdentifier: HKCategoryTypeIdentifier(rawValue: item.type)) {
             hkSample = HKCategorySample.init(type: type, value: Int(item.value), start: item.startDate, end: item.endDate, metadata: item.metadata)
         } else if item.type == HKObjectType.workoutType().identifier {
-            hkSample = HKWorkout.init(activityType: HKWorkoutActivityType(rawValue: 0)!, start: item.startDate, end: item.endDate, duration: item.value, totalEnergyBurned: HKQuantity(unit: HKUnit.init(from: item.totalEnergyBurnedUnit), doubleValue: item.totalEnergyBurned), totalDistance: HKQuantity(unit: HKUnit.init(from: item.totalDistanceUnit), doubleValue: item.totalDistance), device: nil, metadata: item.metadata)
+            hkSample = HKWorkout.init(activityType: item.activityType!, start: item.startDate, end: item.endDate, duration: item.value, totalEnergyBurned: HKQuantity(unit: HKUnit.init(from: item.totalEnergyBurnedUnit), doubleValue: item.totalEnergyBurned), totalDistance: HKQuantity(unit: HKUnit.init(from: item.totalDistanceUnit), doubleValue: item.totalDistance), device: HKDevice.local(), metadata: item.metadata)
         } else {
             print("didnt catch this item - \(item)")
         }
@@ -291,7 +320,7 @@ class HKimporter : NSObject, XMLParserDelegate {
             successBlock()
         })
     }
-
+    
     func activityByName(activityName: String) -> HKWorkoutActivityType {
         var res = HKWorkoutActivityType(rawValue: 0)
         switch activityName {
@@ -305,12 +334,14 @@ class HKimporter : NSObject, XMLParserDelegate {
             res = HKWorkoutActivityType.mixedMetabolicCardioTraining
         case "HKWorkoutActivityTypeYoga":
             res = HKWorkoutActivityType.yoga
-        case "HKWorkoutActivityTypeFunctionalStrengthTraining":
-            res = HKWorkoutActivityType.functionalStrengthTraining
         case "HKWorkoutActivityTypeTraditionalStrengthTraining":
             res = HKWorkoutActivityType.traditionalStrengthTraining
         case "HKWorkoutActivityTypeDance":
             res = HKWorkoutActivityType.dance
+        case "HKWorkoutActivityTypeJumpRope":
+            res = HKWorkoutActivityType.jumpRope
+        case "HKWorkoutActivityTypeSwimming":
+            res = HKWorkoutActivityType.swimming
         default:
             print ("???????")
             print ("Add support for activity - \(activityName)")
