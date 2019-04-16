@@ -257,7 +257,7 @@ class HKimporter : NSObject, XMLParserDelegate {
             // filter you need 
             if let typeFilter = self.activityTypeFilter {
                 let ret = typeFilter.first(where: {$0 == currRecord.activityType})
-                if(ret == false){
+                if(ret == nil){
                     return
                 }
             }

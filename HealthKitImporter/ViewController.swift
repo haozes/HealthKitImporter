@@ -24,7 +24,7 @@ class ViewController: UIViewController {
     
     @IBAction func start(_ sender: Any) {
         dataImporter = HKimporter {
-            dataImporter.activityTypeFilter = [HKWorkoutActivityType.jumpRope,HKWorkoutActivityType.traditionalStrengthTraining]
+            self.dataImporter.activityTypeFilter = [HKWorkoutActivityType.traditionalStrengthTraining]
             if let path = Bundle.main.url(forResource: "export", withExtension: "xml") {
                 if let parser = XMLParser(contentsOf: path) {
                     parser.delegate = self.dataImporter
