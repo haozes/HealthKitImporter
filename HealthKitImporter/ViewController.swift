@@ -24,7 +24,8 @@ class ViewController: UIViewController {
     
     @IBAction func start(_ sender: Any) {
         dataImporter = HKimporter {
-            self.dataImporter.activityTypeFilter = [HKWorkoutActivityType.traditionalStrengthTraining]
+            // 设置你想导入的运动类型数据
+            self.dataImporter.activityTypeFilter = [HKWorkoutActivityType.jumpRope]
             if let path = Bundle.main.url(forResource: "export", withExtension: "xml") {
                 if let parser = XMLParser(contentsOf: path) {
                     parser.delegate = self.dataImporter
