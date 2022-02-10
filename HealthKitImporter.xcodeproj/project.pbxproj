@@ -18,6 +18,7 @@
 		4C8BA0041FB1D921007C2D4F /* HKimporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8BA0031FB1D921007C2D4F /* HKimporter.swift */; };
 		4C8BA00A1FB1EA45007C2D4F /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C8BA0091FB1EA45007C2D4F /* HealthKit.framework */; };
 		D70C63A82265B2010075FA2C /* export.xml in Resources */ = {isa = PBXBuildFile; fileRef = D70C63A72265B2000075FA2C /* export.xml */; };
+		D78ADEE123D590E00005C2BB /* HealthStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78ADEE023D590E00005C2BB /* HealthStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 		4C8BA0071FB1EA45007C2D4F /* HealthKitImporter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HealthKitImporter.entitlements; sourceTree = "<group>"; };
 		4C8BA0091FB1EA45007C2D4F /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		D70C63A72265B2000075FA2C /* export.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = export.xml; sourceTree = "<group>"; };
+		D78ADEE023D590E00005C2BB /* HealthStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +120,7 @@
 				4C8B9FDE1FB1D757007C2D4F /* LaunchScreen.storyboard */,
 				4C8B9FE11FB1D757007C2D4F /* Info.plist */,
 				4C8B9FD91FB1D757007C2D4F /* HealthKitImporter.xcdatamodeld */,
+				D78ADEE023D590E00005C2BB /* HealthStore.swift */,
 			);
 			path = HealthKitImporter;
 			sourceTree = "<group>";
@@ -289,6 +292,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C8BA0041FB1D921007C2D4F /* HKimporter.swift in Sources */,
+				D78ADEE123D590E00005C2BB /* HealthStore.swift in Sources */,
 				4C8B9FD51FB1D757007C2D4F /* ViewController.swift in Sources */,
 				4C8B9FDB1FB1D757007C2D4F /* HealthKitImporter.xcdatamodeld in Sources */,
 				4C8B9FD31FB1D757007C2D4F /* AppDelegate.swift in Sources */,
