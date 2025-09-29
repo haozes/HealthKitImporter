@@ -76,3 +76,8 @@ fastlane/test_output
 # https://github.com/johnno1962/injectionforxcode
 
 iOSInjectionProject/
+workout-routes/*.gpx
+HealthKitImporter/.DS_Store
+HealthKitImporter.xcodeproj/xcshareddata/xcschemes/HealthKitImporter.xcscheme
+HealthKitImporter.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+*.gpx
